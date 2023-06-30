@@ -1,59 +1,53 @@
 package pl.coderslab;
 
-
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-public class MockBookService {
+@Service
+public class MockBookService implements BookService {
+
     private static Long nextId = 4L;
-
-    @PostMapping("")
-    public void addBook(@RequestBody Book book) {
-        bookService.add(book);
-    }
-
-
-
-    private List<Book> list;
+    private List<Book> books;
 
     public MockBookService() {
-        list = new ArrayList<>();
-        list.add(new Book(1L, "9788324631766", "Thinking in Java", "Bruce Eckel", "Helion", "programming"));
-        list.add(new Book(2L, "9788324627738", "Rusz głową Java.", "Sierra Kathy, Bates Bert", "Helion", "programming"));
-        list.add(new Book(3L, "9780130819338", "Java 2. Podstawy", "Cay Horstmann, Gary Cornell", "Helion", "programming"));
+        books = new ArrayList<>();
+        books.add(new Book(1L, "9788324631766", "Thinking in Java", "Bruce Eckel", "Helion", "programming"));
+        books.add(new Book(2L, "9788324627738", "Rusz głową Java.", "Sierra Kathy, Bates Bert", "Helion", "programming"));
+        books.add(new Book(3L, "9780130819338", "Java 2. Podstawy", "Cay Horstmann, Gary Cornell", "Helion", "programming"));
     }
 
     @Override
-    public void update(Book book) {
-        if (this.get(book.getId()).isPresent()) {
-            int indexOf = list.indexOf(this.get(book.getId()).get());
-            list.set(indexOf, book);
-        }
-    }
-
-    @Override
-    public void delete(Long id) {
-        if (get(id).isPresent()) {
-            list.remove(this.get(id).get());
-        }
-    }
-
-    @Override
-    public Optional<Book> get(Long id) {
-        return list.stream().filter(item -> item.getId().equals(id)).findFirst();
+    public List<Book> getBooks() {
+        return books;
     }
 
     @Override
     public void add(Book book) {
         book.setId(nextId++);
-        list.add(book);
+        books.add(book);
+    }
+
+    @Override
+    public Optional<Book> get(Long id) {
+        return books.stream().filter(item -> item.getId().equals(id)).findFirst();
+    }
+
+    @Override
+    public void delete(Long id) {
+        get(id).ifPresent(book -> books.remove(book));
+    }
+
+    @Override
+    public void update(Book book) {
+        get(book.getId()).ifPresent(existingBook -> {
+            existingBook.setIsbn(book.getIsbn());
+            existingBook.setTitle(book.getTitle());
+            existingBook.setAuthor(book.getAuthor());
+            existingBook.setPublisher(book.getPublisher());
+            existingBook.setType(book.getType());
+        });
     }
 }
-
-
-
-
