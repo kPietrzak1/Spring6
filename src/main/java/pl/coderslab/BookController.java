@@ -1,8 +1,8 @@
 package pl.coderslab;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/books")
@@ -10,9 +10,31 @@ public class BookController {
 
     private BookService bookService;
 
+    @PutMapping("")
+    @ResponseBody
+    public void updateBook(@RequestBody Book book) {
+        bookService.update(book);
+    }
+
+
+    @DeleteMapping("/{id}")
+    public void removeBook(@PathVariable Long id) {
+        bookService.delete(id);
+    }
+
+
     public BookController(BookService bookService) {
         this.bookService = bookService;
     }
+    @GetMapping("/{id}")
+    public Book getBook(@PathVariable Long id) {
+        return this.bookService.get(id).orElseThrow(() -> {
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "entity not found"
+            );
+        });
+    }
+
 
     @RequestMapping("/helloBook")
     public Book helloBook() {
